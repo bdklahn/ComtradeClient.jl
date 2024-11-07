@@ -1,0 +1,13 @@
+name = "ComtradeClient"
+uuid = "45561e9f-b623-492f-9311-9e6c8adc7f35"
+authors = ["Brian D. Klahn <briandk@virginia.edu> and contributors"]
+version = "1.0.0-DEV"
+
+[compat]
+julia = "1.6.7"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
