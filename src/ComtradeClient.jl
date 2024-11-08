@@ -1,6 +1,6 @@
 module ComtradeClient
 
-using URIs, HTTP, JSON3
+using URIs, HTTP, JSON3, CodecZlib, Arrow, CSV
 
 export pull
 

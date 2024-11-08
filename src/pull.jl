@@ -18,9 +18,7 @@ function pull(domain::String=domain;
 
     headers=Vector{Pair{String, String}}()
     if !isempty(subscription_key) push!(headers, "Ocp-Apim-Subscription-Key" => subscription_key) end
-    @show headers
-    path =
-    api === bulk ? j("/", s(a), v, "get", s(typecode), s(freqcode), s(clcode)) : ""
+    path = api === bulk ? j("/", s(a), v, "get", s(typecode), s(freqcode), s(clcode)) : ""
 
     query = []
     for (n, q) in (
@@ -48,10 +46,10 @@ function pull(domain::String=domain;
             JSON3.pretty(io, d)
         end
 
-        outfile = j(outdir, "$hash.gz")
+        outfile = j(outdir, "$hash.feather")
         open(outfile, "w") do io
-            r_body = HTTP.get(d[:fileUrl], headers, response_stream=IOBuffer()).body
-            write(io, take!(r_body))
+            r = HTTP.get(d[:fileUrl], headers, response_stream=IOBuffer())
+            Arrow.write(io, CSV.File(transcode(GzipDecompressor, take!(r.body)); downcast=true))
         end
     end
     jsn
