@@ -15,3 +15,6 @@ const v = "v1"
 
 "Trade (IMTS) classifications: HS, SITC, BEC or EBOPS."
 @enum clCode HS SITC BEC EBOPS
+
+"Columns which can be encoded with much fewer posibilities than the full alphabet of strings."
+const categoricals = [:typeCode, :freqCode, :flowCode, :classificationSearchCode, :classificationCode, :cmdCode, :customsCode]

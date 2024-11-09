@@ -18,7 +18,7 @@ function pull(domain::String=domain;
 
     headers=Vector{Pair{String, String}}()
     if !isempty(subscription_key) push!(headers, "Ocp-Apim-Subscription-Key" => subscription_key) end
-    path = api === bulk ? j("/", s(a), v, "get", s(typecode), s(freqcode), s(clcode)) : ""
+    path = api === bulk ? j("/", s(a), v, "get", s(typecode), s(freqcode), s(clcode)) : "/"
 
     query = []
     for (n, q) in (
@@ -33,7 +33,7 @@ function pull(domain::String=domain;
     query = join(query, "&")
 
     uri = URI(;scheme="https", host=domain, path, query)
-    @show uri
+    @info uri
 
     metadata_resp = HTTP.get(uri; headers)
     jsn = JSON3.read(String(metadata_resp.body))
@@ -49,7 +49,9 @@ function pull(domain::String=domain;
         outfile = j(outdir, "$hash.feather")
         open(outfile, "w") do io
             r = HTTP.get(d[:fileUrl], headers, response_stream=IOBuffer())
-            Arrow.write(io, CSV.File(transcode(GzipDecompressor, take!(r.body)); downcast=true))
+            df = CSV.read(transcode(GzipDecompressor, take!(r.body)), DataFrame; downcast=true)
+            transform!(df, categoricals .=> categorical, renamecols=false)
+            Arrow.write(io, df)
         end
     end
     jsn
