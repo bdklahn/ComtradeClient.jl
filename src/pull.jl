@@ -70,7 +70,7 @@ function pull(domain::String=domain;
 
     metadata_json = JSON3.read(String(HTTP.get(uri; headers).body))
 
-    for d in metadata_json.data[1:1]
+    for d in metadata_json.data
         hash = "$(d[:rowKey])"
 
         metadatafile = j(outdir, "$(hash)_metadata.json")
