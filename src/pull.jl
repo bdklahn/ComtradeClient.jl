@@ -48,6 +48,7 @@ function pull(domain::String=domain;
     outdir::String="./",
     nfileslimit::Union{Int, Nothing}=nothing,
     )
+    mkpath(outdir)
     j, a, s = joinpath, string(api), string
 
     headers=Vector{Pair{String, String}}()
