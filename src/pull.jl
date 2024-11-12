@@ -1,15 +1,15 @@
 # to only extract the id and text of the results in H6.json
-struct H6Result
+struct HSResult
     id::String
     text::String
 end
 
-struct H6
-    results::Array{H6Result, 1}
+struct HSroot
+    results::Array{HSResult, 1}
 end
 
-StructTypes.StructType(::Type{H6Result}) = StructTypes.Struct()
-StructTypes.StructType(::Type{H6}) = StructTypes.Struct()
+StructTypes.StructType(::Type{HSResult}) = StructTypes.Struct()
+StructTypes.StructType(::Type{HSroot}) = StructTypes.Struct()
 
 categ_compress(v) = categorical(v, compress = true)
 
@@ -17,13 +17,16 @@ categ_compress(v) = categorical(v, compress = true)
 Get the H6 classifications and generate a
 feather id to text lookup table
 """
-function get_gen_H6(outdir::String="./")
-    jsn_str = String(HTTP.get(H6_json_url).body)
+function get_gen_HS(
+    outdir::String="./",
+    version::String="H6",
+    )
+    jsn_str = String(HTTP.get(HS_json_url * "$version.json").body)
     jsn = JSON3.read(jsn_str)
     open(joinpath(outdir, "H6.json"), "w") do io
         JSON3.pretty(io, jsn)
     end
-    h6_results = JSON3.read(jsn_str, H6).results
+    h6_results = JSON3.read(jsn_str, HSroot).results
     df = DataFrame(id = [r.id for r in h6_results], text = [r.text for r in h6_results])
     transform!(df, [:id, :text] .=> categ_compress, renamecols=false)
     open(joinpath(outdir, "H6_id_text.feather"), "w") do io

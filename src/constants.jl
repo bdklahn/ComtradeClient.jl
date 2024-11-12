@@ -19,5 +19,5 @@ const v = "v1"
 "Columns which can be encoded with much fewer posibilities than the full alphabet of strings."
 const categoricals = [:typeCode, :freqCode, :flowCode, :classificationSearchCode, :classificationCode, :cmdCode, :customsCode]
 
-"UN Classifications on economic statistics (https://unstats.un.org/unsd/classifications/Econ) H6"
-const H6_json_url = "https://comtradeapi.un.org/files/v1/app/reference/H6.json"
+"UN Classifications on economic statistics (https://unstats.un.org/unsd/classifications/Econ) HS file base url"
+const HS_json_url = "https://comtradeapi.un.org/files/v1/app/reference/"
