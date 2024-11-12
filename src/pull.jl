@@ -46,6 +46,7 @@ function pull(domain::String=domain;
     publisheddateto::String="",
     subscription_key::String=get(ENV, "COMTRADE_API_KEY", ""),
     outdir::String="./",
+    nfileslimit::Union{Int, Nothing}=nothing,
     )
     j, a, s = joinpath, string(api), string
 
@@ -70,7 +71,14 @@ function pull(domain::String=domain;
 
     metadata_json = JSON3.read(String(HTTP.get(uri; headers).body))
 
-    for d in metadata_json.data
+    """
+    json array containing metadata about each file (including the download url)"
+    `nothing` means no limit is applied, and thus all available files will be
+    downloaded.
+    """
+    filesmetaarray = nfileslimit === nothing ? metadata_json.data : metadata_json.data[1:nfileslimit+1]
+
+    for d in filesmetaarray
         hash = "$(d[:rowKey])"
 
         metadatafile = j(outdir, "$(hash)_metadata.json")
