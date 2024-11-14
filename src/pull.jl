@@ -50,6 +50,7 @@ function pull(domain::String=domain;
     subscription_key::String=get(ENV, "COMTRADE_API_KEY", ""),
     outdir::String="./",
     nfileslimit::Union{Int, Nothing}=nothing,
+    overwriteexisting::Bool=false,
     )
     mkpath(outdir)
     j, a, s = joinpath, string(api), string
@@ -85,12 +86,21 @@ function pull(domain::String=domain;
     for d in filesmetaarray
         hash = "$(d[:rowKey])"
 
+        outfile = j(outdir, "$hash.feather")
+        if isfile(outfile) && !overwriteexisting
+            @warn """
+            skipping $outfile
+            . . . because it already exists.
+            Set `overwriteexisting` to `true` to force overwrite.
+            """
+            continue
+        end
+
         metadatafile = j(outdir, "$(hash)_metadata.json")
         open(metadatafile, "w") do io
             JSON3.pretty(io, d)
         end
 
-        outfile = j(outdir, "$hash.feather")
         open(outfile, "w") do io
             r = HTTP.get(d[:fileUrl], headers, response_stream=IOBuffer())
             df = CSV.read(transcode(GzipDecompressor, take!(r.body)), DataFrame; downcast=true)
