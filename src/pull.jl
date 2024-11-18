@@ -96,17 +96,16 @@ function pull(domain::String=domain;
             continue
         end
 
-        metadatafile = j(outdir, "$(hash)_metadata.json")
-        open(metadatafile, "w") do io
-            JSON3.pretty(io, d)
-        end
-
         open(outfile, "w") do io
             r = HTTP.get(d[:fileUrl], headers, response_stream=IOBuffer())
             df = CSV.read(transcode(GzipDecompressor, take!(r.body)), DataFrame; downcast=true)
             transform!(df, categoricals .=> categ_compress, renamecols=false)
-            Arrow.write(io, df)
+            @show outfile
+            Arrow.write(io, df; file=true)
         end
+    end
+    open(j(outdir, "meta.json"), "w") do io
+        JSON3.pretty(io, metadata_json)
     end
     metadata_json
 end
