@@ -17,7 +17,7 @@ categ_compress(v) = categorical(v, compress = true)
 Get the H6 classifications and generate a
 feather id to text lookup table
 """
-function get_gen_HS(
+function get_gen_HS(;
     outdir::String="./",
     version::String="H6",
     )
@@ -30,8 +30,49 @@ function get_gen_HS(
     df = DataFrame(id = [r.id for r in h6_results], text = [r.text for r in h6_results])
     transform!(df, [:id, :text] .=> categ_compress, renamecols=false)
     open(joinpath(outdir, "H6_id_text.feather"), "w") do io
-        Arrow.write(io, df)
+        Arrow.write(io, df; file=true)
     end
+    jsn
+end
+
+"""
+Get the json file which encodes the reporters information,
+download, and generate an Arrow lookup table.
+"""
+function get_reporters(
+    url::String=reporters_url;
+    outdir::String="./",
+    writejson::Bool=true,
+    writearrow::Bool=true,
+    )
+    jsn = JSON3.read(HTTP.get(url).body)
+    if writejson
+        open(joinpath(outdir, "Reporters.json"), "w") do io
+            JSON3.pretty(io, jsn)
+        end
+    end
+
+    if !writearrow return jsn end
+
+    jres = jsn.results
+    df = DataFrame(
+        id = [r.id for r in jres],
+        text = [r.text for r in jres],
+        reporterCode = [r.reporterCode for r in jres],
+        reporterDesc = [r.reporterDesc for r in jres],
+        reporterNote = [hasproperty(r, :reporterNote) ? r.reporterNote : "" for r in jres],
+        reporterCodeIsoAlpha2 = [hasproperty(r, :reporterCodeIsoAlpha2) ? r.reporterCodeIsoAlpha2 : "" for r in jres],
+        reporterCodeIsoAlpha3 = [r.reporterCodeIsoAlpha3 for r in jres],
+        entryEffectiveDate = [r.entryEffectiveDate for r in jres],
+        isGroup = [r.isGroup for r in jres],
+        )
+    transform!(df, [:reporterCode, :reporterCodeIsoAlpha2, :reporterCodeIsoAlpha3] .=> categ_compress, renamecols=false)
+    df.entryEffectiveDate = DateTime.(df.entryEffectiveDate)
+    df.isGroup = Bool.(df.isGroup)
+    df.id = UInt16.(df.id)
+    open(joinpath(outdir, "Reporters.feather"), "w") do io
+        Arrow.write(io, df; file=true)
+     end
     jsn
 end
 

@@ -21,3 +21,6 @@ const categoricals = [:typeCode, :freqCode, :flowCode, :classificationSearchCode
 
 "UN Classifications on economic statistics (https://unstats.un.org/unsd/classifications/Econ) HS file base url"
 const HS_json_url = "https://comtradeapi.un.org/files/v1/app/reference/"
+
+"Reference of reporting entities (E.g. to look up information about reporterCode)"
+const reporters_url = "https://comtradeapi.un.org/files/v1/app/reference/Reporters.json"
