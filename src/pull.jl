@@ -20,13 +20,18 @@ feather id to text lookup table
 function get_gen_HS(;
     outdir::String="./",
     version::String="H6",
+    writejson::Bool=true,
+    writearrow::Bool=true,
     )
-    jsn_str = String(HTTP.get(HS_json_url * "$version.json").body)
-    jsn = JSON3.read(jsn_str)
-    open(joinpath(outdir, "H6.json"), "w") do io
-        JSON3.pretty(io, jsn)
+    jsn = JSON3.read(HTTP.get(HS_json_url * "$version.json").body)
+
+    if writejson
+        open(joinpath(outdir, "H6.json"), "w") do io
+            JSON3.pretty(io, jsn)
+        end
     end
-    h6_results = JSON3.read(jsn_str, HSroot).results
+    if !writearrow return jsn end
+    h6_results = JSON3.read(JSON3.write(jsn), HSroot).results
     df = DataFrame(id = [r.id for r in h6_results], text = [r.text for r in h6_results])
     transform!(df, [:id, :text] .=> categ_compress, renamecols=false)
     open(joinpath(outdir, "H6_id_text.feather"), "w") do io
