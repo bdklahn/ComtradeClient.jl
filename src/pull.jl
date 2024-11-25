@@ -81,6 +81,81 @@ function get_reporters(
     jsn
 end
 
+function get_partner_areas(
+    url::String=partner_areas_url;
+    outdir::String="./",
+    writejson::Bool=true,
+    writearrow::Bool=true,
+    )
+    jsn = JSON3.read(HTTP.get(url).body)
+    if writejson
+        open(joinpath(outdir, "partnerAreas_test.json"), "w") do io
+            JSON3.pretty(io, jsn)
+        end
+    end
+
+    if !writearrow return jsn end
+
+    jres = jsn.results
+    df = DataFrame(
+        id = [r.id for r in jres],
+        text = [r.text for r in jres],
+        PartnerCode = [r.PartnerCode for r in jres],
+        PartnerDesc = [r.PartnerDesc for r in jres],
+        partnerNote = [hasproperty(r, :partnerNote) ? r.partnerNote : "" for r in jres],
+        PartnerCodeIsoAlpha2 = [hasproperty(r, :PartnerCodeIsoAlpha2) ? r.PartnerCodeIsoAlpha2 : "" for r in jres],
+        PartnerCodeIsoAlpha3 = [r.PartnerCodeIsoAlpha3 for r in jres],
+        entryEffectiveDate = [r.entryEffectiveDate for r in jres],
+        isGroup = [r.isGroup for r in jres],
+        )
+    transform!(df, [:PartnerCode, :PartnerCodeIsoAlpha2, :PartnerCodeIsoAlpha3] .=> categ_compress, renamecols=false)
+    df.entryEffectiveDate = DateTime.(df.entryEffectiveDate)
+    df.isGroup = Bool.(df.isGroup)
+    df.id = UInt16.(df.id)
+    open(joinpath(outdir, "partnerAreas_test.feather"), "w") do io
+        Arrow.write(io, df; file=true)
+     end
+    jsn
+end
+
+"""
+Read the meta.json file, filter by various criteria,
+and return a list of the downloaded files.
+This function expects a meta.json file already
+pulled to the datadir.
+"""
+function filter_meta_files(
+    datadir::String=datadir;
+    periods::Vector{Int}=[2023],
+    typecodes::Vector{typeCode}=[C],
+    clcodes::Vector{clCode}=[H0, H1, H2, H3, H4, H5, H6],
+    skipmissing::Bool=true,
+    )
+    meta_path = joinpath(datadir, "meta.json")
+    if !isfile(meta_path) @error "missing: $meta_path" end
+    paths = []
+    typecodes = [string(t) for t in typecodes]
+    clcodes = [string(t) for t in clcodes]
+    mta_jsn_dta = JSON3.read(meta_path).data
+    for d in mta_jsn_dta
+        p = d[:period]
+        py = div(p, 100)
+        if (p in periods || py in periods) &&
+            d[:typeCode] in typecodes &&
+            d[:classificationCode] in clcodes
+            pth = joinpath(datadir, "$(d[:rowKey]).feather")
+            if !isfile(pth)
+                @warn "does not exist: $pth"
+                if skipmissing
+                    @warn "skipping: $pth"
+                end
+            end
+            push!(paths, pth)
+        end
+    end
+    paths
+end
+
 """
 Generate standard URI's for Comtrade endpoints.
 """
