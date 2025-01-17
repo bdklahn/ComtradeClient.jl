@@ -156,6 +156,13 @@ function filter_meta_files(
     paths
 end
 
+function set_col_types(i, name)
+    if Symbol(name) in bool_cols
+        return Bool
+    end
+    nothing
+end
+
 """
 Generate standard URI's for Comtrade endpoints.
 """
@@ -219,8 +226,8 @@ function pull(domain::String=domain;
 
         open(outfile, "w") do io
             r = HTTP.get(d[:fileUrl], headers, response_stream=IOBuffer())
-            df = CSV.read(transcode(GzipDecompressor, take!(r.body)), DataFrame; downcast=true)
-            transform!(df, categoricals .=> categ_compress, renamecols=false)
+            df = CSV.read(transcode(GzipDecompressor, take!(r.body)), DataFrame; stringtype=String, types=set_col_types)
+            # transform!(df, categoricals .=> categ_compress, renamecols=false)
             @show outfile
             Arrow.write(io, df; file=true)
         end
