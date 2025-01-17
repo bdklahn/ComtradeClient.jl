@@ -164,7 +164,8 @@ function set_col_types(i, name)
 end
 
 """
-Generate standard URI's for Comtrade endpoints.
+Pull UN Comtrade data and convert to Arrow IPC files
+with appropriate data types.
 """
 function pull(domain::String=domain;
     api::API=bulk,
