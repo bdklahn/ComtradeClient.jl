@@ -17,7 +17,26 @@ const v = "v1"
 @enum clCode HS H0 H1 H2 H3 H4 H5 H6 SITC BEC EBOPS
 
 "Columns which can be encoded with much fewer posibilities than the full alphabet of strings."
-const categoricals = [:typeCode, :freqCode, :flowCode, :classificationSearchCode, :classificationCode, :cmdCode, :customsCode]
+const categoricals = Set((
+    :datasetCode,
+    :typeCode,
+    :freqCode,
+    :flowCode,
+    :classificationSearchCode,
+    :classificationCode,
+    :cmdCode,
+    :customsCode,
+    :partnerCode,
+    :partner2Code,
+    :reporterCode,
+    :mosCode,
+    :motCode,
+    :qtyUnitCode,
+    :altQtyUnitCode,
+    ))
+
+
+
 
 "UN Classifications on economic statistics (https://unstats.un.org/unsd/classifications/Econ) HS file base url"
 const HS_json_url = "https://comtradeapi.un.org/files/v1/app/reference/"
@@ -35,7 +54,7 @@ const partner_areas_url = file_app_ref_url*"partnerAreas.json"
 const datadir = "bulk"
 
 "data columns we should make sure are encoded as Bool (vs., say, Float64)"
-const bool_cols = (
+const bool_cols = Set((
     :isAggregate,
     :isAltQtyEstimated,
     :isGrossWgtEstimated,
@@ -43,4 +62,4 @@ const bool_cols = (
     :isOriginalClassification,
     :isQtyEstimated,
     :isReported,
-    )
+    ))

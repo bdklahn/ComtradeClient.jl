@@ -163,6 +163,13 @@ function set_col_types(i, name)
     nothing
 end
 
+function set_pooled_cols(i, name)
+    if Symbol(name) in categoricals
+        return true
+    end
+    nothing
+end
+
 """
 Pull UN Comtrade data and convert to Arrow IPC files
 with appropriate data types.
@@ -227,7 +234,7 @@ function pull(domain::String=domain;
 
         open(outfile, "w") do io
             r = HTTP.get(d[:fileUrl], headers, response_stream=IOBuffer())
-            df = CSV.read(transcode(GzipDecompressor, take!(r.body)), DataFrame; stringtype=String, types=set_col_types)
+            df = CSV.read(transcode(GzipDecompressor, take!(r.body)), DataFrame; stringtype=String, types=set_col_types, pool=set_pooled_cols)
             # transform!(df, categoricals .=> categ_compress, renamecols=false)
             @show outfile
             Arrow.write(io, df; file=true)
