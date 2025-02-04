@@ -117,6 +117,40 @@ function get_partner_areas(
      end
     jsn
 end
+"""
+Get lookup information for mapping QtyCode to abbreviations
+and descriptions. Optionally (default: "true") download jsn
+and processed Arrow.
+"""
+function get_qty_units(
+    url::String=qty_units_url;
+    outdir::String="./",
+    writejson::Bool=true,
+    writearrow::Bool=true,
+    )
+    jsn = JSON3.read(HTTP.get(url).body)
+    if writejson || writearrow mkpath(outdir) end
+    if writejson
+        open(joinpath(outdir, "UnitsOfQuantity.json"), "w") do io
+            JSON3.pretty(io, jsn)
+        end
+    end
+
+    if !writearrow return jsn end
+
+    jres = jsn.results
+    df = DataFrame(
+        qtyCode = [r.qtyCode for r in jres],
+        qtyAbbr = [r.qtyAbbr for r in jres],
+        qtyDescription = [r.qtyDescription for r in jres],
+        # partnerNote = [hasproperty(r, :partnerNote) ? r.partnerNote : "" for r in jres], # example for dealing with missing
+        )
+    transform!(df, [:qtyAbbr,] .=> categ_compress, renamecols=false)
+    open(joinpath(outdir, "UnitsOfQuantity.arrow"), "w") do io
+        Arrow.write(io, df; file=true)
+     end
+    jsn
+end
 
 """
 Read the meta.json file, filter by various criteria,
