@@ -271,7 +271,7 @@ function pull(domain::String=domain;
             r = HTTP.get(d[:fileUrl], headers, response_stream=IOBuffer())
             df = CSV.read(transcode(GzipDecompressor, take!(r.body)), DataFrame; stringtype=String, types=set_col_types, pool=set_pooled_cols)
             # transform!(df, categoricals .=> categ_compress, renamecols=false)
-            @show outfile
+            @info outfile
             Arrow.write(io, df; file=true)
         end
     end
