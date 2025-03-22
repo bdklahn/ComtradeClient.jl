@@ -191,9 +191,10 @@ function filter_meta_files(
 end
 
 function set_col_types(i, name)
-    if Symbol(name) in bool_cols
-        return Bool
-    end
+    sname = Symbol(name)
+    sname in bool_cols ? Bool :
+    sname in int_cols ? Int :
+    sname in float_cols ? Float64 :
     nothing
 end
 

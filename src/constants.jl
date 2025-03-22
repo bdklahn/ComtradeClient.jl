@@ -66,3 +66,31 @@ const bool_cols = Set((
     :isQtyEstimated,
     :isReported,
     ))
+
+"data columns we should make sure are encoded as Int"
+const int_cols = Set((
+    :datasetCode,
+    :refPeriodId,
+    :refYear,
+    :refMonth,
+    :period,
+    :reporterCode,
+    :partnerCode,
+    :partner2Code,
+    :mosCode,
+    :motCode,
+    :qtyUnitCode,
+    :altQtyUnitCode,
+    :legacyEstimationFlag,
+    ))
+
+"data columns we should make sure are encoded as Float"
+const float_cols = Set((
+    :qty,
+    :altQty,
+    :netWgt,
+    :grossWgt,
+    :CIFValue,
+    :FOBValue,
+    :primaryValue,
+    ))
