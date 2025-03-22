@@ -243,7 +243,7 @@ function pull(domain::String=domain;
     query = join(query, "&")
 
     uri = URI(;scheme="https", host=domain, path, query)
-    @info uri
+    @info "uri: $uri"
 
     metadata_json = JSON3.read(String(HTTP.get(uri; headers).body))
 
