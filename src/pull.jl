@@ -257,7 +257,7 @@ function pull(domain::String=domain;
     for d in filesmetaarray
         hash = "$(d[:rowKey])"
 
-        outfile = j(outdir, "$hash.feather")
+        outfile = j(outdir, "$hash.arrow")
         if isfile(outfile) && !overwriteexisting
             @warn """
             skipping $outfile
