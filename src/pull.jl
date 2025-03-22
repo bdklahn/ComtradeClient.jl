@@ -194,7 +194,7 @@ function set_col_types(i, name)
     sname = Symbol(name)
     sname in bool_cols ? Bool :
     sname in int_cols ? Int :
-    sname in float_cols ? Float64 :
+    sname in float_cols ? Union{Missing,Float64} :
     nothing
 end
 
