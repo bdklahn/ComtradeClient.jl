@@ -222,6 +222,7 @@ function pull(domain::String=domain;
     outdir::String="./",
     nfileslimit::Union{Int, Nothing}=nothing,
     overwriteexisting::Bool=false,
+    metadataonly::Bool=false,
     )
     mkpath(outdir)
     j, a, s = joinpath, string(api), string
@@ -250,6 +251,8 @@ function pull(domain::String=domain;
     @info "uri: $uri"
 
     metadata_json = JSON3.read(String(HTTP.get(uri; headers).body))
+
+    if metadataonly return metadata_json end
 
     """
     json array containing metadata about each file (including the download url)"
