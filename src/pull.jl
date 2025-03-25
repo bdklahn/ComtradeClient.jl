@@ -280,3 +280,38 @@ function pull(domain::String=domain;
     end
     metadata_json
 end
+
+function today_period(;freqcodeM=true)
+    td = today()
+    y = year(td)
+    if !freqcodeM return y end
+    y * 100 + month(td)
+end
+
+"""
+    Filter the meta.json file retrned from a Comtrade API pull to only
+    include the files that match the criteria.
+"""
+function filter_meta_json(
+    datadir::AbstractString=joinpath(datadir, "bulk");
+    periodstart::Int=200000,
+    periodend::Int=today_period(),
+    classcodevers::clCode=H6,
+)
+    jsn_path = joinpath(datadir, "meta.json")
+    @assert isfile(jsn_path) "missing: $jsn_path"
+    jsn = JSON3.read(jsn_path)
+    selected_indices = UInt[]
+    for (i, d) in enumerate(jsn.data)
+        if (!(get(d, :classificationCode) == string(classcodevers)) ||
+            !(periodstart <= d[:period] <= periodend))
+            continue
+        end
+        push!(selected_indices, i)
+    end
+    view(jsn.data, selected_indices)
+end
+
+function gen_arrow_paths(jsn_data::AbstractArray, datadir::AbstractString=joinpath(datadir, "bulk"))
+    [joinpath(datadir, "$(d.rowKey).arrow") for d in jsn_data]
+end

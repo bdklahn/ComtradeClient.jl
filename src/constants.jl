@@ -94,3 +94,11 @@ const float_cols = Set((
     :FOBValue,
     :primaryValue,
     ))
+
+const projectdir = get(ENV, "PROJECT_DIR", "/project/bi_dpi")
+
+"Set the default datadir according to whether the project directory exists."
+const datadir = let
+    parent = isdir(projectdir) ? projectdir : "./"
+    joinpath(parent, "data/UN_Comtrade")
+end # let
