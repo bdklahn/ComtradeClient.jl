@@ -222,7 +222,6 @@ function pull(domain::String=domain;
     outdir::String="./",
     nfileslimit::Union{Int, Nothing}=nothing,
     overwriteexisting::Bool=false,
-    metadataonly::Bool=false,
     )
     mkpath(outdir)
     j, a, s = joinpath, string(api), string
@@ -252,14 +251,12 @@ function pull(domain::String=domain;
 
     metadata_json = JSON3.read(String(HTTP.get(uri; headers).body))
 
-    if metadataonly return metadata_json end
-
     """
     json array containing metadata about each file (including the download url)"
     `nothing` means no limit is applied, and thus all available files will be
     downloaded.
     """
-    filesmetaarray = nfileslimit === nothing ? metadata_json.data : metadata_json.data[1:nfileslimit+1]
+    filesmetaarray = nfileslimit === nothing ? metadata_json.data : metadata_json.data[1:nfileslimit]
 
     for d in filesmetaarray
         hash = "$(d[:rowKey])"
