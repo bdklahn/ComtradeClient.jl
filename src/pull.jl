@@ -227,7 +227,11 @@ function pull(domain::String=domain;
     j, a, s = joinpath, string(api), string
 
     headers=Vector{Pair{String, String}}()
-    if !isempty(subscription_key) push!(headers, "Ocp-Apim-Subscription-Key" => subscription_key) end
+    if !isempty(subscription_key)
+        push!(headers, "Ocp-Apim-Subscription-Key" => subscription_key)
+    else
+        @warn "No subscription key provided nor COMTRADE_API_KEY ENV variable found."
+    end
     path = api === bulk ? j("/", s(a), v, "get", s(typecode), s(freqcode), s(clcode)) : "/"
 
     query = []
