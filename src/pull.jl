@@ -316,18 +316,15 @@ function filter_meta_json(
     datadir::AbstractString=joinpath(datadir, "bulk");
     periodstart::Int=200000,
     periodend::Int=today_period(),
-    classcodevers::clCode=H6,
 )
     jsn_path = joinpath(datadir, "meta.json")
     @assert isfile(jsn_path) "missing: $jsn_path"
     jsn = JSON3.read(jsn_path)
     selected_indices = UInt[]
     for (i, d) in enumerate(jsn.data)
-        if (!(get(d, :classificationCode) == string(classcodevers)) ||
-            !(periodstart <= d[:period] <= periodend))
-            continue
+        if periodstart <= d[:period] <= periodend
+            push!(selected_indices, i)
         end
-        push!(selected_indices, i)
     end
     view(jsn.data, selected_indices)
 end
