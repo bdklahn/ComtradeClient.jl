@@ -5,13 +5,13 @@ struct HSResult
 end
 
 struct HSroot
-    results::Array{HSResult, 1}
+    results::Array{HSResult,1}
 end
 
 StructTypes.StructType(::Type{HSResult}) = StructTypes.Struct()
 StructTypes.StructType(::Type{HSroot}) = StructTypes.Struct()
 
-categ_compress(v) = categorical(v, compress = true)
+categ_compress(v) = categorical(v, compress=true)
 
 """
 Get the H6 classifications and generate a
@@ -22,7 +22,7 @@ function get_gen_HS(;
     version::String="H6",
     writejson::Bool=true,
     writearrow::Bool=true,
-    )
+)
     jsn = JSON3.read(HTTP.get(HS_json_url * "$version.json").body)
 
     if writejson
@@ -30,9 +30,11 @@ function get_gen_HS(;
             JSON3.pretty(io, jsn)
         end
     end
-    if !writearrow return jsn end
+    if !writearrow
+        return jsn
+    end
     h6_results = JSON3.read(JSON3.write(jsn), HSroot).results
-    df = DataFrame(id = [r.id for r in h6_results], text = [r.text for r in h6_results])
+    df = DataFrame(id=[r.id for r in h6_results], text=[r.text for r in h6_results])
     transform!(df, [:id, :text] .=> categ_compress, renamecols=false)
     open(joinpath(outdir, "H6_id_text.feather"), "w") do io
         Arrow.write(io, df; file=true)
@@ -49,7 +51,7 @@ function get_reporters(
     outdir::String="./",
     writejson::Bool=true,
     writearrow::Bool=true,
-    )
+)
     jsn = JSON3.read(HTTP.get(url).body)
     if writejson
         open(joinpath(outdir, "Reporters.json"), "w") do io
@@ -57,27 +59,29 @@ function get_reporters(
         end
     end
 
-    if !writearrow return jsn end
+    if !writearrow
+        return jsn
+    end
 
     jres = jsn.results
     df = DataFrame(
-        id = [r.id for r in jres],
-        text = [r.text for r in jres],
-        reporterCode = [r.reporterCode for r in jres],
-        reporterDesc = [r.reporterDesc for r in jres],
-        reporterNote = [hasproperty(r, :reporterNote) ? r.reporterNote : "" for r in jres],
-        reporterCodeIsoAlpha2 = [hasproperty(r, :reporterCodeIsoAlpha2) ? r.reporterCodeIsoAlpha2 : "" for r in jres],
-        reporterCodeIsoAlpha3 = [r.reporterCodeIsoAlpha3 for r in jres],
-        entryEffectiveDate = [r.entryEffectiveDate for r in jres],
-        isGroup = [r.isGroup for r in jres],
-        )
+        id=[r.id for r in jres],
+        text=[r.text for r in jres],
+        reporterCode=[r.reporterCode for r in jres],
+        reporterDesc=[r.reporterDesc for r in jres],
+        reporterNote=[hasproperty(r, :reporterNote) ? r.reporterNote : "" for r in jres],
+        reporterCodeIsoAlpha2=[hasproperty(r, :reporterCodeIsoAlpha2) ? r.reporterCodeIsoAlpha2 : "" for r in jres],
+        reporterCodeIsoAlpha3=[r.reporterCodeIsoAlpha3 for r in jres],
+        entryEffectiveDate=[r.entryEffectiveDate for r in jres],
+        isGroup=[r.isGroup for r in jres],
+    )
     transform!(df, [:reporterCode, :reporterCodeIsoAlpha2, :reporterCodeIsoAlpha3] .=> categ_compress, renamecols=false)
     df.entryEffectiveDate = DateTime.(df.entryEffectiveDate)
     df.isGroup = Bool.(df.isGroup)
     df.id = UInt16.(df.id)
     open(joinpath(outdir, "Reporters.feather"), "w") do io
         Arrow.write(io, df; file=true)
-     end
+    end
     jsn
 end
 
@@ -86,7 +90,7 @@ function get_partner_areas(
     outdir::String="./",
     writejson::Bool=true,
     writearrow::Bool=true,
-    )
+)
     jsn = JSON3.read(HTTP.get(url).body)
     if writejson
         open(joinpath(outdir, "partnerAreas_test.json"), "w") do io
@@ -94,27 +98,29 @@ function get_partner_areas(
         end
     end
 
-    if !writearrow return jsn end
+    if !writearrow
+        return jsn
+    end
 
     jres = jsn.results
     df = DataFrame(
-        id = [r.id for r in jres],
-        text = [r.text for r in jres],
-        PartnerCode = [r.PartnerCode for r in jres],
-        PartnerDesc = [r.PartnerDesc for r in jres],
-        partnerNote = [hasproperty(r, :partnerNote) ? r.partnerNote : "" for r in jres],
-        PartnerCodeIsoAlpha2 = [hasproperty(r, :PartnerCodeIsoAlpha2) ? r.PartnerCodeIsoAlpha2 : "" for r in jres],
-        PartnerCodeIsoAlpha3 = [r.PartnerCodeIsoAlpha3 for r in jres],
-        entryEffectiveDate = [r.entryEffectiveDate for r in jres],
-        isGroup = [r.isGroup for r in jres],
-        )
+        id=[r.id for r in jres],
+        text=[r.text for r in jres],
+        PartnerCode=[r.PartnerCode for r in jres],
+        PartnerDesc=[r.PartnerDesc for r in jres],
+        partnerNote=[hasproperty(r, :partnerNote) ? r.partnerNote : "" for r in jres],
+        PartnerCodeIsoAlpha2=[hasproperty(r, :PartnerCodeIsoAlpha2) ? r.PartnerCodeIsoAlpha2 : "" for r in jres],
+        PartnerCodeIsoAlpha3=[r.PartnerCodeIsoAlpha3 for r in jres],
+        entryEffectiveDate=[r.entryEffectiveDate for r in jres],
+        isGroup=[r.isGroup for r in jres],
+    )
     transform!(df, [:PartnerCode, :PartnerCodeIsoAlpha2, :PartnerCodeIsoAlpha3] .=> categ_compress, renamecols=false)
     df.entryEffectiveDate = DateTime.(df.entryEffectiveDate)
     df.isGroup = Bool.(df.isGroup)
     df.id = UInt16.(df.id)
     open(joinpath(outdir, "partnerAreas_test.feather"), "w") do io
         Arrow.write(io, df; file=true)
-     end
+    end
     jsn
 end
 """
@@ -127,28 +133,32 @@ function get_qty_units(
     outdir::String="./",
     writejson::Bool=true,
     writearrow::Bool=true,
-    )
+)
     jsn = JSON3.read(HTTP.get(url).body)
-    if writejson || writearrow mkpath(outdir) end
+    if writejson || writearrow
+        mkpath(outdir)
+    end
     if writejson
         open(joinpath(outdir, "UnitsOfQuantity.json"), "w") do io
             JSON3.pretty(io, jsn)
         end
     end
 
-    if !writearrow return jsn end
+    if !writearrow
+        return jsn
+    end
 
     jres = jsn.results
     df = DataFrame(
-        qtyCode = [r.qtyCode for r in jres],
-        qtyAbbr = [r.qtyAbbr for r in jres],
-        qtyDescription = [r.qtyDescription for r in jres],
+        qtyCode=[r.qtyCode for r in jres],
+        qtyAbbr=[r.qtyAbbr for r in jres],
+        qtyDescription=[r.qtyDescription for r in jres],
         # partnerNote = [hasproperty(r, :partnerNote) ? r.partnerNote : "" for r in jres], # example for dealing with missing
-        )
+    )
     transform!(df, [:qtyAbbr,] .=> categ_compress, renamecols=false)
     open(joinpath(outdir, "UnitsOfQuantity.arrow"), "w") do io
         Arrow.write(io, df; file=true)
-     end
+    end
     jsn
 end
 
@@ -164,9 +174,11 @@ function filter_meta_files(
     typecodes::Vector{typeCode}=[C],
     clcodes::Vector{clCode}=[H0, H1, H2, H3, H4, H5, H6],
     skipmissing::Bool=true,
-    )
+)
     meta_path = joinpath(datadir, "meta.json")
-    if !isfile(meta_path) @error "missing: $meta_path" end
+    if !isfile(meta_path)
+        @error "missing: $meta_path"
+    end
     paths = []
     typecodes = [string(t) for t in typecodes]
     clcodes = [string(t) for t in clcodes]
@@ -175,8 +187,8 @@ function filter_meta_files(
         p = d[:period]
         py = div(p, 100)
         if (p in periods || py in periods) &&
-            d[:typeCode] in typecodes &&
-            d[:classificationCode] in clcodes
+           d[:typeCode] in typecodes &&
+           d[:classificationCode] in clcodes
             pth = joinpath(datadir, "$(d[:rowKey]).feather")
             if !isfile(pth)
                 @warn "does not exist: $pth"
@@ -220,13 +232,13 @@ function pull(domain::String=domain;
     publisheddateto::String="",
     subscription_key::String=get(ENV, "COMTRADE_API_KEY", ""),
     outdir::String="./",
-    nfileslimit::Union{Int, Nothing}=nothing,
+    nfileslimit::Union{Int,Nothing}=nothing,
     overwriteexisting::Bool=false,
-    )
+)
     mkpath(outdir)
     j, a, s = joinpath, string(api), string
 
-    headers=Vector{Pair{String, String}}()
+    headers = Vector{Pair{String,String}}()
     if !isempty(subscription_key)
         push!(headers, "Ocp-Apim-Subscription-Key" => subscription_key)
     else
@@ -240,13 +252,15 @@ function pull(domain::String=domain;
         ("period", period),
         ("publishedDateFrom", publisheddatefrom),
         ("publishedDateTo", publisheddateto),
-        )
-        if !isempty(q) push!(query, "$n=$q") end
+    )
+        if !isempty(q)
+            push!(query, "$n=$q")
+        end
     end
 
     query = join(query, "&")
 
-    uri = URI(;scheme="https", host=domain, path, query)
+    uri = URI(; scheme="https", host=domain, path, query)
     @info "uri: $uri"
 
     metadata_json = JSON3.read(String(HTTP.get(uri; headers).body))
@@ -285,10 +299,12 @@ function pull(domain::String=domain;
     metadata_json
 end
 
-function today_period(;freqcodeM=true)
+function today_period(; freqcodeM=true)
     td = today()
     y = year(td)
-    if !freqcodeM return y end
+    if !freqcodeM
+        return y
+    end
     y * 100 + month(td)
 end
 
