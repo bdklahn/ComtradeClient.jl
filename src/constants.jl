@@ -99,3 +99,6 @@ const projectdir = get(ENV, "PROJECT_DIR", "/project/bi_dpi")
 
 "Set the default datadir according to whether the project directory exists."
 const datadir = joinpath(isdir(projectdir) ? projectdir : "./", "data/UN_Comtrade")
+
+"Gallium Nitride (GaN) & Indium Phosphide (InP) HS codes"
+const GaN_InP_HS_codes = Set(("285000", "811291", "811299"))
