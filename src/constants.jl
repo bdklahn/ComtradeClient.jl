@@ -53,9 +53,6 @@ const partner_areas_url = file_app_ref_url*"partnerAreas.json"
 "Reference of The unit for quantity and alternate quantity data items (E.g. to look up information about qtyUnitCode)"
 const qty_units_url = file_app_ref_url*"QuantityUnits.json"
 
-"Make the bulk pull directory the default data dir."
-const datadir = "bulk"
-
 "data columns we should make sure are encoded as Bool (vs., say, Float64)"
 const bool_cols = Set((
     :isAggregate,
